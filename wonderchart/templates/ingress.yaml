@@ -1,0 +1,27 @@
+{{- if and .Values.ingress }}
+{{- range $host, $val := .Values.ingress.hosts }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $.Release.Name }}-{{ $host }}
+{{- if $.Values.ingress.annotations }}
+  annotations:
+{{ toYaml $.Values.ingress.annotations | trim | indent 4  }}
+{{- end }}
+  labels:
+    host_name: {{ $host  }}
+    app: {{ $.Release.Name }}
+spec:
+  rules:
+  - host: {{ $host }}
+    http:
+      paths:
+      {{- range $paths := $val.paths }}
+      - path: "{{ $paths.path }}"
+        backend:
+          serviceName: "{{ $paths.serviceName }}"
+          servicePort: {{ $paths.servicePort }}
+      {{- end }}
+{{- end }}
+{{- end }}

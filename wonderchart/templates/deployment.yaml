@@ -1,0 +1,66 @@
+{{- if .Values.app }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name  }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+      annotations:
+        Revision: "{{ .Release.Revision  }}"
+    spec:
+{{- if .Values.app.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.app.nodeSelector | trim | indent 8  }}
+{{- end }}
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.app.image.repository }}:{{ .Values.app.image.tag | default "latest" }}
+          imagePullPolicy: {{ .Values.app.image.PullPolicy | default "IfNotPresent"}}
+          {{- if .Values.app.command }}
+          command:
+{{ toYaml .Values.app.command | indent 12 }}
+          {{- end }}
+          {{- if .Values.app.args }}
+          args:
+{{ toYaml .Values.app.args | indent 12 }}
+          {{- end }}
+          {{- if .Values.app.resources }}
+          resources:
+{{ toYaml .Values.app.resources | trim | indent 12 }}
+          {{- end }}
+          {{- if .Values.app.service }}
+          ports:
+            {{- range $port := .Values.app.service.ports }}
+            - name:          {{ $port.name }}
+              containerPort: {{ $port.targetport }}
+              protocol: TCP
+            {{- end }}
+          {{- end }}
+          envFrom:
+            {{- if .Values.envconfig }}
+            - configMapRef:
+                name: {{ $.Release.Name }}-config
+             {{- end }}
+            {{- if .Values.secret }}
+            - secretRef:
+                name: {{ $.Release.Name }}-secret
+             {{- end }}
+          {{- if .Values.app.livenessProbe }}
+          livenessProbe:
+{{ toYaml .Values.app.livenessProbe | indent 12 }}
+          {{- end }}
+          {{- if .Values.app.readinessProbe }}
+          readinessProbe:
+{{ toYaml .Values.app.readinessProbe | indent 12 }}
+          {{- end }}
+{{- end }}

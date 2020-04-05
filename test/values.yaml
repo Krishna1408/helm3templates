@@ -1,0 +1,33 @@
+# Default values for sennder.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+app:
+  image:
+    repository: nginx
+#    tag: somevalue
+    pullPolicy: Always
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    ports:
+      - name: http          # descriptive name
+        port: 80 # the port the container wants to expose
+        targetport:  9200 # the port we want to expose externally
+
+migration:
+  image:
+    repository: nginx
+#    tag: somevalue
+  command: ["echo"]
+  args: ["$(sec2)"]
+
+secret:
+  data:
+    sec1: YWRtaW4=
+    sec2: MWYyZDFlMmU2N2Rm
+
+
+envconfig:
+  chart: 'wonderchart'
+  version: '0.1.1'

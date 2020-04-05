@@ -1,0 +1,20 @@
+{{- if .Values.app.service }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}
+  labels:
+    app: {{ $.Release.Name }}
+spec:
+  type: {{ default "ClusterIP" .Values.app.service.type }}
+  ports:
+  {{- range $port := .Values.app.service.ports }}
+    - port: {{ $port.port | default "80" }}
+      name: {{ $port.name  | default "http" }}
+      targetPort: {{ $port.targetport | default "8080" }}
+      protocol: TCP
+  {{- end }}
+  selector:
+    app: {{ .Release.Name }}
+{{- end }}
