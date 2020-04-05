@@ -1,0 +1,41 @@
+{{- if .Values.migration }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migration-{{ .Release.Name  }}
+  labels:
+    app: migration-{{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migration-{{ .Release.Name }}
+          image: {{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag | default "latest" }}
+          {{- if .Values.migration.command }}
+          command:
+{{ toYaml .Values.migration.command | indent 12 }}
+          {{- end }}
+          {{- if .Values.migration.args }}
+          args:
+{{ toYaml .Values.migration.args | indent 12 }}
+          {{- end }}
+          {{- if .Values.migration.resources }}
+          resources:
+{{ toYaml .Values.migration.resources | trim | indent 12 }}
+          {{- end }}
+          envFrom:
+            {{- if .Values.envconfig }}
+            - configMapRef:
+                name: {{ $.Release.Name }}-config
+             {{- end }}
+            {{- if .Values.secret }}
+            - secretRef:
+                name: {{ $.Release.Name }}-secret
+             {{- end }}
+
+{{- end }}
