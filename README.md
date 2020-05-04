@@ -1,4 +1,6 @@
 # helm3templates
 Helm Templates for chartmuseum &amp; Chartmuseum configuration.
 
-## WIP -- This repo to be used for my next medium article
+Check it out at Medium:
+
+https://itnext.io/how-to-make-kubernetes-deployments-easier-witth-helm3-chartmuseusm-34f043b2124c
